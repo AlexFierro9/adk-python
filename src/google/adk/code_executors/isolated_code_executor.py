@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from contextlib import redirect_stdout
-import io
-import re
-from typing import Any
+import sys
+import subprocess
 
 from pydantic import Field
 from typing_extensions import override
@@ -12,9 +10,6 @@ from ..agents.invocation_context import InvocationContext
 from .base_code_executor import BaseCodeExecutor
 from .code_execution_utils import CodeExecutionInput
 from .code_execution_utils import CodeExecutionResult
-
-import sys
-import subprocess
 
 #Don't think this is needed anymore but keeping it around just in case.
 
