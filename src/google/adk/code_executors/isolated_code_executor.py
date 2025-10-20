@@ -19,8 +19,12 @@ from .code_execution_utils import CodeExecutionResult
 #     globals_['__name__'] = '__main__'
 
 class IsolatedCodeExecutor(BaseCodeExecutor):
-  """A code executor that safely executes code in an isolated environment through 
-    the current local context."""
+  """A code executor that executes code in an isolated process.
+
+  This provides memory isolation from the main application, but it is not a
+  full security sandbox. The executed code runs with the same permissions as the
+  main application and can access the filesystem, network, etc.
+  """
 
   # Overrides the BaseCodeExecutor attribute: this executor cannot be stateful.
   stateful: bool = Field(default=False, frozen=True, exclude=True)
