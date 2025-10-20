@@ -11,12 +11,6 @@ from .base_code_executor import BaseCodeExecutor
 from .code_execution_utils import CodeExecutionInput
 from .code_execution_utils import CodeExecutionResult
 
-#Don't think this is needed anymore but keeping it around just in case.
-
-# def _prepare_globals(code: str, globals_: dict[str, Any]) -> None:
-#   """Prepare globals for code execution, injecting __name__ if needed."""
-#   if re.search(r"if\s+__name__\s*==\s*['\"]__main__['\"]", code):
-#     globals_['__name__'] = '__main__'
 
 class IsolatedCodeExecutor(BaseCodeExecutor):
   """A code executor that executes code in an isolated process.
@@ -57,7 +51,7 @@ class IsolatedCodeExecutor(BaseCodeExecutor):
     text=True
     )
 
-    # Collect the final result.
+
     return CodeExecutionResult(
         stdout=process_result.stdout,
         stderr=process_result.stderr,
