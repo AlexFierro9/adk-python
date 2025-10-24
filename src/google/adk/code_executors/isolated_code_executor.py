@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import sys
 import subprocess
+import sys
 
 from pydantic import Field
 from typing_extensions import override
