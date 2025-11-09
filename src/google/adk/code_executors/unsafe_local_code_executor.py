@@ -27,6 +27,7 @@ from ..agents.invocation_context import InvocationContext
 from .base_code_executor import BaseCodeExecutor
 from .code_execution_utils import CodeExecutionInput
 from .code_execution_utils import CodeExecutionResult
+from .isolated_code_executor import IsolatedCodeExecutor
 
 logger = logging.getLogger('google_adk.' + __name__)
 
