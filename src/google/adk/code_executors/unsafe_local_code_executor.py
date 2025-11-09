@@ -16,6 +16,8 @@ from __future__ import annotations
 
 from contextlib import redirect_stdout
 import io
+import subprocess
+import sys
 import re
 from typing import Any
 
@@ -26,6 +28,7 @@ from ..agents.invocation_context import InvocationContext
 from .base_code_executor import BaseCodeExecutor
 from .code_execution_utils import CodeExecutionInput
 from .code_execution_utils import CodeExecutionResult
+from .isolated_code_executor import IsolatedCodeExecutor
 
 
 def _prepare_globals(code: str, globals_: dict[str, Any]) -> None:
@@ -35,7 +38,10 @@ def _prepare_globals(code: str, globals_: dict[str, Any]) -> None:
 
 
 class UnsafeLocalCodeExecutor(BaseCodeExecutor):
-  """A code executor that unsafely execute code in the current local context."""
+  """A code executor that unsafely execute code in the current local context.
+
+  This executor can be configured to run code in an isolated process.
+  """
 
   # Overrides the BaseCodeExecutor attribute: this executor cannot be stateful.
   stateful: bool = Field(default=False, frozen=True, exclude=True)
@@ -44,7 +50,9 @@ class UnsafeLocalCodeExecutor(BaseCodeExecutor):
   # optimize_data_file.
   optimize_data_file: bool = Field(default=False, frozen=True, exclude=True)
 
-  def __init__(self, **data):
+  use_isolated_process: bool = False
+
+  def __init__(self, use_isolated_process: bool = False, **data):
     """Initializes the UnsafeLocalCodeExecutor."""
     if 'stateful' in data and data['stateful']:
       raise ValueError('Cannot set `stateful=True` in UnsafeLocalCodeExecutor.')
@@ -52,7 +60,10 @@ class UnsafeLocalCodeExecutor(BaseCodeExecutor):
       raise ValueError(
           'Cannot set `optimize_data_file=True` in UnsafeLocalCodeExecutor.'
       )
-    super().__init__(**data)
+    super().__init__(use_isolated_process=use_isolated_process, **data)
+    self.use_isolated_process = use_isolated_process
+    if self.use_isolated_process:
+      self._isolated_executor = IsolatedCodeExecutor()
 
   @override
   def execute_code(
@@ -60,6 +71,11 @@ class UnsafeLocalCodeExecutor(BaseCodeExecutor):
       invocation_context: InvocationContext,
       code_execution_input: CodeExecutionInput,
   ) -> CodeExecutionResult:
+    if self.use_isolated_process:
+      return self._isolated_executor.execute_code(
+          invocation_context, code_execution_input
+      )
+
     # Execute the code.
     output = ''
     error = ''
