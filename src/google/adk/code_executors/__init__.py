@@ -19,7 +19,6 @@ import logging
 from .base_code_executor import BaseCodeExecutor
 from .built_in_code_executor import BuiltInCodeExecutor
 from .code_executor_context import CodeExecutorContext
-from .isolated_code_executor import IsolatedCodeExecutor
 from .unsafe_local_code_executor import UnsafeLocalCodeExecutor
 
 logger = logging.getLogger('google_adk.' + __name__)
@@ -27,7 +26,6 @@ logger = logging.getLogger('google_adk.' + __name__)
 __all__ = [
     'BaseCodeExecutor',
     'BuiltInCodeExecutor',
-    'IsolatedCodeExecutor',
     'CodeExecutorContext',
     'UnsafeLocalCodeExecutor',
     'VertexAiCodeExecutor',

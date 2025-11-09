@@ -17,17 +17,17 @@ from __future__ import annotations
 from contextlib import redirect_stdout
 import io
 import logging
-import re
+import subprocess
+import sys
 from typing import Any
 
 from pydantic import Field
 from typing_extensions import override
 
 from ..agents.invocation_context import InvocationContext
-from .base_code_executor import BaseCodeExecutor
 from .code_execution_utils import CodeExecutionInput
 from .code_execution_utils import CodeExecutionResult
-from .isolated_code_executor import IsolatedCodeExecutor
+from .base_code_executor import BaseCodeExecutor
 
 logger = logging.getLogger('google_adk.' + __name__)
 
@@ -63,8 +63,6 @@ class UnsafeLocalCodeExecutor(BaseCodeExecutor):
       )
     super().__init__(use_isolated_process=use_isolated_process, **data)
     self.use_isolated_process = use_isolated_process
-    if self.use_isolated_process:
-      self._isolated_executor = IsolatedCodeExecutor()
 
   @override
   def execute_code(
@@ -72,23 +70,38 @@ class UnsafeLocalCodeExecutor(BaseCodeExecutor):
       invocation_context: InvocationContext,
       code_execution_input: CodeExecutionInput,
   ) -> CodeExecutionResult:
+    if self.use_isolated_process:
+      logger.debug(
+          'Executing code in isolated process:\n```\n%s\n```',
+          code_execution_input.code,
+      )
+      process_result = subprocess.run(
+          [sys.executable, '-c', code_execution_input.code],
+          capture_output=True,
+          text=True,
+      )
+      return CodeExecutionResult(
+          stdout=process_result.stdout,
+          stderr=process_result.stderr,
+          output_files=[],
+      )
+
     logger.debug('Executing code:\n```\n%s\n```', code_execution_input.code)
     # Execute the code.
-    output = ''
-    error = ''
+    stdout_capture = io.StringIO()
+    stderr_capture = io.StringIO()
     try:
       globals_ = {}
       _prepare_globals(code_execution_input.code, globals_)
-      stdout = io.StringIO()
-      with redirect_stdout(stdout):
+      with redirect_stdout(stdout_capture):
         exec(code_execution_input.code, globals_)
-      output = stdout.getvalue()
     except Exception as e:
-      error = str(e)
+      import traceback
+      stderr_capture.write(traceback.format_exc())
 
     # Collect the final result.
     return CodeExecutionResult(
-        stdout=output,
-        stderr=error,
+        stdout=stdout_capture.getvalue(),
+        stderr=stderr_capture.getvalue(),
         output_files=[],
     )
