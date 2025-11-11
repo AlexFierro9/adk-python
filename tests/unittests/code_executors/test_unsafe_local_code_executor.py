@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-
 from unittest.mock import MagicMock
 
 from google.adk.agents.base_agent import BaseAgent
@@ -106,8 +105,8 @@ class TestUnsafeLocalCodeExecutor:
   def test_execute_code_isolated_simple_print(
       self, mock_invocation_context: InvocationContext
   ):
-    """Test execution with use_isolated_process=True."""
-    executor = UnsafeLocalCodeExecutor(use_isolated_process=True)
+    """Test execution with use_separate_process=True."""
+    executor = UnsafeLocalCodeExecutor(use_separate_process=True)
     code_input = CodeExecutionInput(code='print("hello isolated world")')
     result = executor.execute_code(mock_invocation_context, code_input)
 
@@ -119,8 +118,8 @@ class TestUnsafeLocalCodeExecutor:
   def test_execute_code_isolated_with_error(
       self, mock_invocation_context: InvocationContext
   ):
-    """Test error handling with use_isolated_process=True."""
-    executor = UnsafeLocalCodeExecutor(use_isolated_process=True)
+    """Test error handling with use_separate_process=True."""
+    executor = UnsafeLocalCodeExecutor(use_separate_process=True)
     code_input = CodeExecutionInput(code='raise ValueError("Isolated error")')
     result = executor.execute_code(mock_invocation_context, code_input)
 
@@ -132,8 +131,8 @@ class TestUnsafeLocalCodeExecutor:
   def test_execute_code_isolated_with_import(
       self, mock_invocation_context: InvocationContext
   ):
-    """Test imports with use_isolated_process=True."""
-    executor = UnsafeLocalCodeExecutor(use_isolated_process=True)
+    """Test imports with use_separate_process=True."""
+    executor = UnsafeLocalCodeExecutor(use_separate_process=True)
     code = "import os; print(os.linesep)"
     code_input = CodeExecutionInput(code=code)
     result = executor.execute_code(mock_invocation_context, code_input)
@@ -157,7 +156,7 @@ class TestUnsafeLocalCodeExecutor:
       self, mock_invocation_context: InvocationContext
   ):
     """Test that variables do not persist between isolated executions."""
-    executor = UnsafeLocalCodeExecutor(use_isolated_process=True)
+    executor = UnsafeLocalCodeExecutor(use_separate_process=True)
 
     # First execution defines a variable.
     code_input1 = CodeExecutionInput(code="x = 100")
@@ -173,7 +172,7 @@ class TestUnsafeLocalCodeExecutor:
       self, mock_invocation_context: InvocationContext
   ):
     """Test that functions do not persist between isolated executions."""
-    executor = UnsafeLocalCodeExecutor(use_isolated_process=True)
+    executor = UnsafeLocalCodeExecutor(use_separate_process=True)
 
     code_input1 = CodeExecutionInput(code="def my_func(): return 'isolated'")
     executor.execute_code(mock_invocation_context, code_input1)

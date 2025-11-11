@@ -25,9 +25,9 @@ from pydantic import Field
 from typing_extensions import override
 
 from ..agents.invocation_context import InvocationContext
+from .base_code_executor import BaseCodeExecutor
 from .code_execution_utils import CodeExecutionInput
 from .code_execution_utils import CodeExecutionResult
-from .base_code_executor import BaseCodeExecutor
 
 logger = logging.getLogger('google_adk.' + __name__)
 
@@ -51,9 +51,9 @@ class UnsafeLocalCodeExecutor(BaseCodeExecutor):
   # optimize_data_file.
   optimize_data_file: bool = Field(default=False, frozen=True, exclude=True)
 
-  use_isolated_process: bool = False
+  use_separate_process: bool = False
 
-  def __init__(self, use_isolated_process: bool = False, **data):
+  def __init__(self, use_separate_process: bool = False, **data):
     """Initializes the UnsafeLocalCodeExecutor."""
     if 'stateful' in data and data['stateful']:
       raise ValueError('Cannot set `stateful=True` in UnsafeLocalCodeExecutor.')
@@ -61,8 +61,8 @@ class UnsafeLocalCodeExecutor(BaseCodeExecutor):
       raise ValueError(
           'Cannot set `optimize_data_file=True` in UnsafeLocalCodeExecutor.'
       )
-    super().__init__(use_isolated_process=use_isolated_process, **data)
-    self.use_isolated_process = use_isolated_process
+    super().__init__(use_separate_process=use_separate_process, **data)
+    self.use_separate_process = use_separate_process
 
   @override
   def execute_code(
@@ -70,7 +70,7 @@ class UnsafeLocalCodeExecutor(BaseCodeExecutor):
       invocation_context: InvocationContext,
       code_execution_input: CodeExecutionInput,
   ) -> CodeExecutionResult:
-    if self.use_isolated_process:
+    if self.use_separate_process:
       logger.debug(
           'Executing code in isolated process:\n```\n%s\n```',
           code_execution_input.code,
